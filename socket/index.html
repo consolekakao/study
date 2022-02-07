@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<script src="/socket.io/socket.io.js"></script>
+<textarea id="contents" cols="50" rows="20"></textarea><br/>
+<input id="name"/>
+<button id="enterBtn" onclick="enter()">입장하기</button>
+<input id="text" placeholder="내용입력" style="display: none"/>
+<button id="sendBtn" onclick="send()" style="display: none">전송</button>
+
+<script>
+  const socket = io()
+
+  const enter = () => {
+    if (!document.getElementById("name").value) {
+      alert("이름을 입력하세요");
+      return;
+    }
+    document.getElementById("name").style.display = "none";
+    document.getElementById("enterBtn").style.display = "none";
+    document.getElementById("text").style.display = "block";
+    document.getElementById("sendBtn").style.display = "block";
+    const field = document.getElementById("contents");
+    field.innerText += "입장!\n"
+
+    socket.emit("login", {
+      name: document.getElementById("name").value
+    })
+
+    socket.on('login', (data) => {
+      field.value += `\n----------${data}님 입장!----------`
+    })
+
+    socket.on('chat', (data) => {
+      field.value += `\n${data.name}:${data.text}`
+    })
+  }
+
+  const send = () => {
+    const text = document.getElementById("text").value;
+    socket.emit("chat", {
+      text: text,
+      name: document.getElementById("name").value
+    })
+  }
+
+</script>
+
+</body>
+</html>
